@@ -1,7 +1,7 @@
 [project]
 name = "agent-homework"
 version = "0.1.0"
-description = "Add your description here"
+description = "用 asyncio + httpx 并发请求多个 HTTP 接口并汇总结果"
 readme = "README.md"
 authors = [
     { name = "JetYu", email = "2106570158@qq.com" }
@@ -9,11 +9,34 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.28.1",
+    "python-dotenv>=1.2.4",
 ]
 
-[project.scripts]
-agent-homework = "agent_homework:main"
+[tool.uv]
+# 本项目是脚本型项目，不作为安装包发布。
+# 关掉包安装可以避免 uv 在 .venv 里生成 editable 的 .pth 文件——
+# 本项目路径含中文，而 Python 的 site 模块用系统 locale(GBK) 读 .pth，
+# 一旦生成该文件解释器就会在启动时崩溃（UnicodeDecodeError: 'gbk'）。
+package = false
 
-[build-system]
-requires = ["uv_build>=0.13.1,<0.14.0"]
-build-backend = "uv_build"
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.pytest.ini_options]
+# 扁平布局：让 pytest 从项目根导入 agent_homework（不依赖 .pth 或可编辑安装）
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ANN"]
+ignore = ["ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"main.py" = ["ANN201"]
